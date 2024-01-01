@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -11,7 +12,7 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
 )
 from PyQt5.QtGui import QPalette, QColor, QFont, QIcon
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 
 class FileManagementApp(QWidget):
     def __init__(self):
@@ -26,35 +27,28 @@ class FileManagementApp(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Entry for directory path
         directory_label = QLabel("Directory Path:")
         self.directory_entry = QLineEdit(self)
+        self.directory_entry.textChanged.connect(self.update_delete_button_state)
 
-        # "Browse" button
         browse_button = QPushButton("Browse", self)
         browse_button.clicked.connect(self.browse_directory)
-        browse_button.setStyleSheet("color: black")  # Чёрный цвет текста
+        browse_button.setStyleSheet("color: white; background-color: #006699;")
 
-        # "Save files" button
         save_button = QPushButton("Save Files", self)
         save_button.clicked.connect(self.save_files)
-        save_button.setStyleSheet("color: black")  # Чёрный цвет текста
+        save_button.setStyleSheet("color: white; background-color: #006699;")
 
-        # "Delete new files" button
         self.delete_button = QPushButton("Delete New Files", self)
         self.delete_button.clicked.connect(self.delete_new_files)
-        self.delete_button.setStyleSheet("color: black")  # Чёрный цвет текста
-        self.delete_button.setEnabled(False)  # Initially disabled
-        self.delete_button.setStyleSheet("background-color: #A9A9A9; color: #808080;")  # Grayed out appearance
+        self.delete_button.setStyleSheet("color: white; background-color: #A9A9A9;")  # Initial grayed out
+        self.delete_button.setEnabled(False)
 
-        # Spacer for messages
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        # Message label for displaying errors and successes
         self.message_label = QLabel("")
         self.message_label.hide()
 
-        # Layout
         layout = QVBoxLayout()
         layout.addWidget(directory_label)
         layout.addWidget(self.directory_entry)
@@ -66,13 +60,9 @@ class FileManagementApp(QWidget):
 
         self.setLayout(layout)
 
-        # Apply dark theme
         self.set_dark_theme()
 
-        # Set window size
-        self.setGeometry(100, 100, 400, 200)  # Увеличиваем размер окна
-
-        # Set fixed size to prevent resizing
+        self.setGeometry(100, 100, 400, 200)
         self.setFixedSize(400, 200)
 
     def browse_directory(self):
@@ -80,22 +70,19 @@ class FileManagementApp(QWidget):
         if directory_path:
             self.directory_entry.setText(directory_path)
             self.load_file_list()
+            self.update_delete_button_state()
 
     def load_file_list(self):
         try:
-            self.file_list = [
-                f
-                for f
-                in os.listdir(self.directory_entry.text())
-                if os.path.isfile(os.path.join(self.directory_entry.text(), f))
-            ]
+            path = Path(self.directory_entry.text())
+            self.file_list = [f.name for f in path.iterdir() if f.is_file()]
         except FileNotFoundError:
             self.display_error("ERROR: THIS ROUTE DOESN'T EXIST")
             return
 
     def save_files(self):
         directory_path = self.directory_entry.text().strip()
-        if not directory_path or not os.path.exists(directory_path):
+        if not directory_path or not Path(directory_path).exists():
             self.display_error("ERROR: INVALID DIRECTORY PATH")
             return
 
@@ -103,9 +90,8 @@ class FileManagementApp(QWidget):
         self.white_list = set(self.file_list)
         self.display_success("Files have been successfully saved to the whitelist!")
 
-        # Enable the "Delete New Files" button after the first save
         self.delete_button.setEnabled(True)
-        self.delete_button.setStyleSheet("color: black;")  # Reset color to black when enabled
+        self.delete_button.setStyleSheet("color: white; background-color: #006699;")
 
     def delete_new_files(self):
         directory_path = self.directory_entry.text()
@@ -117,10 +103,17 @@ class FileManagementApp(QWidget):
         files_to_delete = set(self.file_list) - self.white_list
 
         for file_name in files_to_delete:
-            file_path = os.path.join(self.directory_entry.text(), file_name)
-            os.remove(file_path)
+            file_path = Path(directory_path) / file_name
+            try:
+                file_path.unlink()
+            except PermissionError:
+                self.display_error(f"ERROR: Permission denied for {file_path}")
 
         self.display_success("New files have been successfully DELETED.")
+
+    def update_delete_button_state(self):
+        self.delete_button.setEnabled(False)
+        self.delete_button.setStyleSheet("color: white; background-color: #A9A9A9;")
 
     def set_dark_theme(self):
         palette = QPalette()
@@ -132,7 +125,6 @@ class FileManagementApp(QWidget):
         palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
         self.setPalette(palette)
 
-        # Set a modern font
         font = QFont("Roboto", 10)
         self.setFont(font)
 
@@ -151,7 +143,6 @@ class FileManagementApp(QWidget):
     def clear_error(self):
         self.message_label.clear()
         self.message_label.hide()
-
 
 if __name__ == "__main__":
     app = QApplication([], applicationName="New Files Deleter")
