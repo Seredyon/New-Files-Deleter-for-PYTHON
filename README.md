@@ -16,8 +16,8 @@ This is a simple PyQt5-based desktop application for managing files in a specifi
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/your-repository.git
-   cd your-repository
+   git clone https://github.com/Seredyon/New-Files-Deleter-for-PYTHON.git
+   cd New-Files-Deleter-for-PYTHON
    ```
 
 2. Install the required dependencies:
