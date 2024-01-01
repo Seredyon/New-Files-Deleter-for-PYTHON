@@ -32,7 +32,7 @@ This is a simple PyQt5-based desktop application for managing files in a specifi
 
 ## Usage
 1. Launch the application.
-2. Click the "Browse" button to select a directory.
+2. Click the "Browse" button to select a directory or typing using Ctrl + V.
 3. Click the "Save Files" button to save the current files in the directory to the whitelist.
 4. Click the "Delete New Files" button to delete files added to the directory after saving to the whitelist.
 
