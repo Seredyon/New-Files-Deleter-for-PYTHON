@@ -27,7 +27,7 @@ This is a simple PyQt5-based desktop application for managing files in a specifi
 
 3. Run the application:
    ```bash
-   main.py
+   python main.py
    ```
 
 ## Usage
