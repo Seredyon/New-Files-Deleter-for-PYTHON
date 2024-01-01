@@ -147,7 +147,7 @@ class FileManagementApp(QWidget):
 if __name__ == "__main__":
     app = QApplication([], applicationName="New Files Deleter")
 
-    app_icon_path = r"C:\Users\Алекс\Downloads\FileDeleter.ico"
+    app_icon_path = r"path/to/your/icon"
     app_icon = QIcon(app_icon_path)
     app.setWindowIcon(app_icon)
 
